@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { connectToDatabase, collections } from './db.js'
-import getPlayerItems from './api/getPlayerItems.js'
+import getPlayerItems, { FilteredItem } from './api/getPlayerItems.js'
 import getActivity from './api/getActivity.js'
 import getFriendList from './api/getFriendList.js'
 
@@ -22,6 +22,14 @@ const updateQueue = async (steamid: string): Promise<void>=> {
 }
 
 
+interface PlayerSchema {
+  steamid: string,
+  items: FilteredItem[],
+  active?: boolean,
+  minutesPlayed?: number
+}
+
+
 const nextSteamID = async () => {
   let steamid: string
   do {
@@ -39,23 +47,24 @@ const nextSteamID = async () => {
     // item equip data
     const equipped = await getPlayerItems(steamid)
 
-    // player active?
-    let active = false
-    let minutesPlayed = 0
+    // player activity
+    let active: boolean | undefined = undefined
+    let minutesPlayed: number | undefined = undefined
     ratelimitAdjustment += 1000
     try {
       [active, minutesPlayed] = await getActivity(steamid)
     } catch (TypeError) {}
 
     // add to database
-    await collections.players?.replaceOne({steamid: steamid}, {
+    const newDoc: PlayerSchema = {
       steamid: steamid,
-      active: active,
-      minutesPlayed: minutesPlayed,
       items: equipped
-    }, {
-      upsert: true
-    })
+    }
+
+    if (active != undefined) newDoc.active = active
+    if (minutesPlayed != undefined) newDoc.minutesPlayed = minutesPlayed
+    
+    await collections.players?.replaceOne({ steamid: steamid }, newDoc, { upsert: true })
     console.log('insert')
 
     // now populate friends queue

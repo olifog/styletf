@@ -26,7 +26,7 @@ interface Item {
   equipped?: EquipData[]
 }
 
-interface FilteredItem {
+export interface FilteredItem {
   defindex: number
   class: number
   slot: number | 'cosmetic' | 'taunt'
