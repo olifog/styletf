@@ -1,0 +1,24 @@
+{
+  "name": "analyser",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --loader ts-node/esm ./index.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "config": "*",
+    "nodemon": "^2.0.15",
+    "styletf": "file:../../packages/styletf",
+    "tsconfig": "*",
+    "typescript": "^4.5.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "mongodb": "^4.4.1",
+    "node-fetch": "^3.2.3",
+    "ts-node": "^10.7.0",
+    "vdf-parser": "^1.2.0"
+  }
+}
