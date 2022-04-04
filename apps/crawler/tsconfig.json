@@ -2,8 +2,7 @@
     "extends": "tsconfig/base.json",
     "include": ["**/*.ts", "**/*.tsx"],
     "exclude": ["node_modules", "dist"],
-    "compilerOptions": {
-        "outDir": "./dist"
+    "ts-node": {
+        "files": true
     }
-  }
-  
+}

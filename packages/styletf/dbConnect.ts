@@ -1,7 +1,6 @@
 import mongoose from 'mongoose'
+import 'dotenv/config'
 
-const dbConnect = async () => {
+export const dbConnect = async () => {
   await mongoose.connect(process.env.MONGODB_URI)
 }
-
-export default dbConnect

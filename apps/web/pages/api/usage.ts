@@ -1,10 +1,11 @@
-import { PlayerModel } from 'models/Player'
-import dbConnect from 'lib/dbConnect'
+import { PlayerModel } from 'styletf'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { PipelineStage } from 'mongoose'
+import { dbConnect } from 'styletf'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect()
+  const schema = {}
 
   const total = await PlayerModel.count({})
 
@@ -43,9 +44,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     aggregate.push({ $limit: limit })
   }
 
-  aggregate.push({ $set: { usage: { $divide: ["$count", total] } } })
-
   const result = await PlayerModel.aggregate(aggregate)
 
-  res.status(200).json(result)
+  const sanitised = result.map(item => {
+    let classes: number
+    const schemaItem = schema[item._id]
+    if (schemaItem.used_by_classes == undefined) {
+      classes = 9
+    } else {
+      classes = schemaItem.used_by_classes.length
+    }
+
+    return {
+      defindex: item._id,
+      count: item.count,
+      name: schema[item._id].name,
+      usage: item.count / (total * classes)  
+    }
+  })
+
+  res.status(200).json(sanitised)
 }

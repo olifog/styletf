@@ -1,12 +1,12 @@
 import 'dotenv/config'
-import { connectToDatabase, collections } from './db.js'
-import getPlayerItems, { FilteredItem } from './api/getPlayerItems.js'
+import getPlayerItems from './api/getPlayerItems.js'
 import getActivity from './api/getActivity.js'
 import getFriendList from './api/getFriendList.js'
+import { dbConnect, PlayerModel } from 'styletf'
+import { UpdateQuery } from 'mongoose'
 
 
-await connectToDatabase()
-
+await dbConnect()
 
 const queue = [process.env.START_STEAMID]
 const seen: string[] = []
@@ -19,14 +19,6 @@ const updateQueue = async (steamid: string): Promise<void>=> {
       queue.push(friend.steamid)
     }
   })
-}
-
-
-interface PlayerSchema {
-  steamid: string,
-  items: FilteredItem[],
-  active?: boolean,
-  minutesPlayed?: number
 }
 
 
@@ -56,21 +48,24 @@ const nextSteamID = async () => {
     } catch (TypeError) {}
 
     // add to database
-    const newDoc: PlayerSchema = {
+    const newDoc: UpdateQuery<any> = {
       steamid: steamid,
       items: equipped
     }
 
     if (active != undefined) newDoc.active = active
     if (minutesPlayed != undefined) newDoc.minutesPlayed = minutesPlayed
-    
-    await collections.players?.replaceOne({ steamid: steamid }, newDoc, { upsert: true })
+
+    await PlayerModel.findOneAndUpdate({ steamid: steamid },
+      newDoc,
+      { upsert: true}
+    )
     console.log('insert')
 
     // now populate friends queue
     ratelimitAdjustment += 1000
     await updateQueue(steamid)
-  } catch (TypeError) {}
+  } catch (err) {}
 
   let elapsed = Date.now() - start
   setTimeout(nextSteamID, Math.max(ratelimitAdjustment - elapsed, 0))
