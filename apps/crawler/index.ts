@@ -72,7 +72,9 @@ const nextSteamID = async () => {
     // now populate friends queue
     ratelimitAdjustment += 1000
     await updateQueue(steamid)
-  } catch (err) {}
+  } catch (err) {
+    console.log(err)
+  }
 
   let elapsed = Date.now() - start
   setTimeout(nextSteamID, Math.max(ratelimitAdjustment - elapsed, 0))
