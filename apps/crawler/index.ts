@@ -8,7 +8,7 @@ import { UpdateQuery } from 'mongoose'
 
 await dbConnect()
 
-const queue = [process.env.START_STEAMID]
+let queue: string[] = []
 const seen: string[] = []
 
 const updateQueue = async (steamid: string): Promise<void>=> {
@@ -28,7 +28,7 @@ const updateQueue = async (steamid: string): Promise<void>=> {
 const nextSteamID = async () => {
   let steamid: string
   do {
-    if (queue.length === 0) return
+    if (queue.length === 0) queue = [process.env.START_STEAMID]
     steamid = queue.shift() as string
   } while (seen.includes(steamid))
   
