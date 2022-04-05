@@ -33,7 +33,8 @@ const nextSteamID = async () => {
   } while (seen.includes(steamid))
   
   seen.push(steamid)
-  console.log(steamid)
+  console.log(seen.length)
+  console.log(queue.length)
 
   if (seen.length > 10000) {
     seen.shift()
@@ -67,7 +68,6 @@ const nextSteamID = async () => {
       newDoc,
       { upsert: true}
     )
-    console.log('insert')
 
     // now populate friends queue
     ratelimitAdjustment += 1000
