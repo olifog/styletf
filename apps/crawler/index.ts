@@ -33,6 +33,7 @@ const nextSteamID = async () => {
   } while (seen.includes(steamid))
   
   seen.push(steamid)
+  console.log(MediaStreamAudioDestinationNode)
 
   if (seen.length > 10000) {
     seen.shift()
