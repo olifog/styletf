@@ -17,6 +17,9 @@ const updateQueue = async (steamid: string): Promise<void>=> {
   friends.forEach(friend => {
     if (!(seen.includes(friend.steamid))) {
       queue.push(friend.steamid)
+      if (queue.length > 10000) {
+        queue.shift()
+      }
     }
   })
 }
@@ -31,6 +34,10 @@ const nextSteamID = async () => {
   
   seen.push(steamid)
   console.log(steamid)
+
+  if (seen.length > 10000) {
+    seen.shift()
+  }
 
   let ratelimitAdjustment = 1000
   let start = Date.now()
