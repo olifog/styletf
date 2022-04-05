@@ -1,67 +1,49 @@
-import { PlayerModel } from 'styletf'
+import { UsageModel } from '../../models/Usage'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { PipelineStage } from 'mongoose'
-import { dbConnect } from 'styletf'
+import { dbConnect } from '../../lib/dbConnect'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect()
-  const schema = {}
 
-  const total = await PlayerModel.count({})
-
-  let limit: number
-
-  if (typeof req.query.limit === 'undefined') {
-    limit = 25
-  } else {
-    limit = parseInt(req.query.limit as string)
+  const queryFilter: {
+    active: boolean | number,
+    minutesThreshold: number,
+    class: number,
+    slot: number | 'cosmetic' | 'taunt'
+  } = {
+    active: -1,
+    minutesThreshold: 0,
+    class: -1,
+    slot: -1
   }
+
+  if (typeof req.query.active !== 'undefined' && req.query.active !== '-1') {
+    queryFilter.active = (req.query.active === 'true')
+  }
+  if (typeof req.query.minutesThreshold === 'string') {
+    queryFilter.minutesThreshold = parseInt(req.query.minutesThreshold)
+  }
+  if (typeof req.query.class === 'string' && req.query.class !== '-1') {
+    queryFilter.class = parseInt(req.query.class)
+  }
+  if (typeof req.query.slot === 'string' && req.query.slot !== '-1') {
+    if (req.query.slot === 'cosmetic' || req.query.slot === 'taunt') {
+      queryFilter.slot = req.query.slot
+    } else {
+      queryFilter.slot = parseInt(req.query.slot)
+    }
+  }
+
+  const order = (typeof req.query.order === 'string') ? parseInt(req.query.order) : -1
+  const limit = (typeof req.query.limit === 'string') ? parseInt(req.query.limit) : 25
   
-  const aggregate: PipelineStage[] = [{ $unwind: { path: '$items' } }]
+  const items = await UsageModel.find(queryFilter).sort({"usage": order}).limit(limit)
 
-  const match = {}
-
-  if (typeof req.query.slot !== 'undefined') {
-    match['items.slot'] = parseInt(req.query.slot as string)
-  }
-
-  if (typeof req.query.class !== 'undefined') {
-    if (req.query.class === 'cosmetic' || req.query.class === 'taunt') {
-      match['items.class'] = req.query.class
-    } else {
-      match['items.class'] = parseInt(req.query.class as string)
-    }
-  }
-
-  if (typeof req.query.active !== 'undefined') {
-    match['active'] = (req.query.active === 'true')
-  }
-
-  aggregate.push({ $match: match })
-  aggregate.push({ $sortByCount: '$items.defindex' })
-
-  if (limit > 0) {
-    aggregate.push({ $limit: limit })
-  }
-
-  const result = await PlayerModel.aggregate(aggregate)
-
-  const sanitised = result.map(item => {
-    let classes: number
-    const schemaItem = schema[item._id]
-    if (schemaItem.used_by_classes == undefined) {
-      classes = 9
-    } else {
-      classes = schemaItem.used_by_classes.length
-    }
-
-    return {
-      defindex: item._id,
-      count: item.count,
-      name: schema[item._id].name,
-      usage: item.count / (total * classes)  
-    }
-  })
-
-  res.status(200).json(sanitised)
+  res.status(200).json(items.map(item => ({
+    defindex: item.defindex,
+    usage: item.usage,
+    name: item.name,
+    imageUrl: item.imageUrl,
+    usedByClasses: item.usedByClasses
+  })))
 }
