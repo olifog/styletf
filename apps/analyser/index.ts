@@ -1,5 +1,5 @@
 
-import { dbConnect, SchemaItemModel, PlayerModel, CountModel } from 'styletf'
+import { dbConnect, PlayerModel } from 'styletf'
 import getUsage from "./getUsage.js"
 import updateSchema from './updateSchema.js'
 
