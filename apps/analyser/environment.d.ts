@@ -5,7 +5,9 @@ declare global {
       MONGODB_URI: string,
       DB_NAME: string,
       PLAYERS_COLLECTION_NAME: string,
-      START_STEAMID: string
+      START_STEAMID: string,
+      THRESHOLD_UPDATE: number,
+      UPDATE_SCHEMA: string
     }
   }
 }

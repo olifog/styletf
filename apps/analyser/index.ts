@@ -1,68 +1,58 @@
 
-import getWebSchema from "./getWebSchema.js"
-import * as VDF from 'vdf-parser'
-import fetch from 'node-fetch'
-import { dbConnect, SchemaItemModel } from 'styletf'
+import { dbConnect, SchemaItemModel, PlayerModel, CountModel } from 'styletf'
+import getUsage from "./getUsage.js"
+import updateSchema from './updateSchema.js'
 
 
-interface ClientSchema {
-  items_game: {
-    items: {
-      [defindex: string]: {
-        equip_region?: string | object,
-        prefab?: string,
-        craft_class: string
-      }
+// https://stackoverflow.com/questions/12303989/cartesian-product-of-multiple-arrays-in-javascript/43053803#43053803
+const cartesian = (...a: any[]) => a.reduce((a, b) => a.flatMap((d: any) => b.map((e: any) => [d, e].flat())))
+
+
+const optionCombinations = [
+  [true, undefined],
+  [120000, undefined],
+  [undefined, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  [undefined, 0, 1, 2, 3, 4, 5, 6, 'taunt', 'cosmetic']
+]
+
+let prevCount = -9999
+
+const nextAnalysis = async () => {
+  const total = await PlayerModel.countDocuments({})
+
+  if (Math.abs(total - prevCount) > process.env.THRESHOLD_UPDATE) {
+    prevCount = total
+    console.log('updating usage data')
+
+    for (const combination of cartesian(...optionCombinations)) {
+      const parameters: {
+        active?: boolean,
+        minutesThreshold?: number,
+        class?: number,
+        slot?: number | 'taunt' | 'cosmetic'
+      } = {}
+
+      if (typeof combination[0] !== 'undefined') parameters.active = combination[0]
+      if (typeof combination[1] !== 'undefined') parameters.minutesThreshold = combination[1]
+      if (typeof combination[2] !== 'undefined') parameters.class = combination[2]
+      if (typeof combination[3] !== 'undefined') parameters.slot = combination[3]
+
+      await getUsage(parameters)
     }
   }
-}
 
-const allClasses = ['Scout', 'Soldier', 'Pyro', 'Demoman', 'Heavy', 'Engineer', 'Medic', 'Sniper', 'Spy']
-
-const parseName = (name: string) => name
-
-const parseClasses = (classes: string[], name: string) => {
-  if (typeof classes == 'undefined') {
-    return allClasses
-  }
-  return classes
-}
-
-const parseEquipRegion = (equipRegion: string | object | undefined, prefab: string | undefined, craftClass: string) => {
-  if (typeof equipRegion === 'undefined') {
-    if (craftClass === 'weapon' || typeof prefab === 'undefined' || prefab.includes('weapon')) {
-      return ['melee']
-    } else {
-      return prefab.split(' ').filter(e => e !== 'valve')
-    }
-  }
-  if (typeof equipRegion === 'string') return [equipRegion]
-
-  return Object.keys(equipRegion)
+  setTimeout(nextAnalysis, 100000)
 }
 
 
-const updateSchema = async () => {
-  const [schema, clientSchemaUrl] = await getWebSchema()
-
-  const response = await fetch(clientSchemaUrl)
-  const vdfData = await response.text()
-
-  const clientSchema = VDF.parse(vdfData) as ClientSchema
-
-  for (const defindex in schema) {
-    const newDoc = {
-      defindex: defindex,
-      name: parseName(schema[defindex].name),
-      imageUrl: schema[defindex].image_url,
-      equipRegion: parseEquipRegion(clientSchema.items_game.items[defindex].equip_region, clientSchema.items_game.items[defindex].prefab, clientSchema.items_game.items[defindex].craft_class),
-      usedByClasses: parseClasses(schema[defindex].used_by_classes, schema[defindex].name)
-    }
-
-    await SchemaItemModel.findOneAndUpdate({ defindex: defindex }, newDoc, { upsert: true })
-  }
-}
-
-
+console.log('connecting to DB...')
 await dbConnect()
-await updateSchema()
+console.log('connected.')
+
+if (process.env.UPDATE_SCHEMA === 'true') {
+  console.log('updating schema...')
+  await updateSchema()
+  console.log('updated schema.')
+}
+
+await nextAnalysis()
