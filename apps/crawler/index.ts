@@ -33,8 +33,6 @@ const nextSteamID = async () => {
   } while (seen.includes(steamid))
   
   seen.push(steamid)
-  console.log(seen.length)
-  console.log(queue.length)
 
   if (seen.length > 10000) {
     seen.shift()
@@ -72,9 +70,7 @@ const nextSteamID = async () => {
     // now populate friends queue
     ratelimitAdjustment += 1000
     await updateQueue(steamid)
-  } catch (err) {
-    console.log(err)
-  }
+  } catch (err) {}
 
   let elapsed = Date.now() - start
   setTimeout(nextSteamID, Math.max(ratelimitAdjustment - elapsed, 0))
