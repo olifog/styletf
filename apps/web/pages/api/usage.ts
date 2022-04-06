@@ -2,15 +2,31 @@ import { UsageModel } from '../../models/Usage'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { dbConnect } from '../../lib/dbConnect'
 
+
+export interface QueryFilter {
+  active: boolean | number,
+  minutesThreshold: number,
+  class: number,
+  slot: number | 'cosmetic' | 'taunt'
+} 
+
+
+export const getItems = async (query: QueryFilter, {limit = 25, order = -1} = {}) => {
+  const items = await UsageModel.find(query).sort({"usage": order}).limit(limit)
+  return items.map(item => ({
+    defindex: item.defindex,
+    usage: item.usage,
+    name: item.name,
+    imageUrl: item.imageUrl,
+    usedByClasses: item.usedByClasses
+  }))
+}
+
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect()
 
-  const queryFilter: {
-    active: boolean | number,
-    minutesThreshold: number,
-    class: number,
-    slot: number | 'cosmetic' | 'taunt'
-  } = {
+  const queryFilter: QueryFilter = {
     active: -1,
     minutesThreshold: 0,
     class: -1,
@@ -37,13 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const order = (typeof req.query.order === 'string') ? parseInt(req.query.order) : -1
   const limit = (typeof req.query.limit === 'string') ? parseInt(req.query.limit) : 25
   
-  const items = await UsageModel.find(queryFilter).sort({"usage": order}).limit(limit)
+  const items = await getItems(queryFilter, {limit: limit, order: order})
 
-  res.status(200).json(items.map(item => ({
-    defindex: item.defindex,
-    usage: item.usage,
-    name: item.name,
-    imageUrl: item.imageUrl,
-    usedByClasses: item.usedByClasses
-  })))
+  res.status(200).json(items)
 }

@@ -1,11 +1,11 @@
 import Link from 'next/link'
-import Steam from '../public/steam.svg'
+import Steam from '../../public/steam.svg'
 import Image from 'next/image'
 
 export default function Footer() {
   return (
     <footer className="absolute h-24 w-screen -bottom-24">
-      <div className="w-2/3 h-full flex flex-col items-center justify-center space-y-2 mx-auto border-t-[1px] border-slate-700 text-slate-400 text-sm">
+      <div className="max-w-screen-md h-full flex flex-col items-center justify-center space-y-2 mx-auto border-t-[1px] border-slate-700 text-slate-400 text-sm">
         <div className="">
           Using assets from <span>
             <Link href="https://steampowered.com">
