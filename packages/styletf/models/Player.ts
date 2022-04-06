@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 const EquippedItem = new mongoose.Schema({
   defindex: { type: Number, required: true },
   class: { type: Number, required: true },
-  slot: { type: String, required: true }
+  slot: { type: mongoose.Schema.Types.Mixed, required: true }
 })
 
 const Player = new mongoose.Schema({
