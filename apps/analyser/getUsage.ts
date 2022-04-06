@@ -9,7 +9,7 @@ interface PlayerQuery {
 }
 
 
-const itemAggregation = (preUnwindMatch: object, postUnwindMatch: object) => [
+const itemAggregation = (preUnwindMatch: PlayerQuery, postUnwindMatch: PlayerQuery) => [
   {$match: preUnwindMatch},
   {$setWindowFields: {
     output: {
@@ -49,11 +49,14 @@ const itemAggregation = (preUnwindMatch: object, postUnwindMatch: object) => [
         {
           $multiply: [
             '$total',
-            {
-              $size: "$schemaitem.usedByClasses"
-            }
+            (typeof postUnwindMatch['items.class'] === 'undefined')
+              ? {
+                  $size: "$schemaitem.usedByClasses"
+                }
+              : 1
           ]
         }
+
       ]
     },
     name: "$schemaitem.name",
