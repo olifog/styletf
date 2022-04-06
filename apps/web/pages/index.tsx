@@ -1,8 +1,9 @@
+import Layout from "components/layout";
 
 export default function MainPage() {
   return (
-    <div>
-      <h1>Web</h1>
-    </div>
+    <Layout>
+      <div></div>
+    </Layout>
   );
 }
