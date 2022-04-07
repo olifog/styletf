@@ -5,6 +5,7 @@ import { useState } from "react"
 import { getItems, QueryFilter } from "lib/getItems"
 import useSWR, { unstable_serialize } from "swr"
 import { SWRConfig } from "swr"
+import Head from "next/head"
 
 const fetcher = (url, params) => fetch(`${url}${optionsToString(params)}`).then(res => res.json())
 
@@ -42,6 +43,9 @@ const Usage = ({ initialOptions}) => {
 export default function Page({ fallback, initialOptions}) {
   return (
     <SWRConfig value={{ fallback }}>
+      <Head>
+        <title>Style.tf | Usage rates</title>
+      </Head>
       <Layout>
         <Usage initialOptions={initialOptions} />
       </Layout>
