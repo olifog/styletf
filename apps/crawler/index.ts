@@ -33,7 +33,7 @@ const nextSteamID = async () => {
   } while (seen.includes(steamid))
   
   seen.push(steamid)
-  console.log(steamid)
+  console.log(queue.length)
 
   if (seen.length > 10000) {
     seen.shift()
@@ -67,10 +67,11 @@ const nextSteamID = async () => {
       newDoc,
       { upsert: true}
     )
-
-    // now populate friends queue
-    ratelimitAdjustment += 1000
-    await updateQueue(steamid)
+    
+    if (newDoc.active === true && newDoc.minutesPlayed > 100000) {
+      ratelimitAdjustment += 1000
+      await updateQueue(steamid)
+    }
   } catch (err) {}
 
   let elapsed = Date.now() - start
