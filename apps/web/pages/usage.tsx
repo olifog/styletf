@@ -2,10 +2,11 @@ import Item from "components/Item"
 import Layout from "components/Layout"
 import Options from "components/Options"
 import { useState } from "react"
-import { getItems, QueryFilter } from "./api/usage"
-import useSWR from "swr"
+import { getItems, QueryFilter } from "lib/getItems"
+import useSWR, { unstable_serialize } from "swr"
+import { SWRConfig } from "swr"
 
-const fetcher = (input, init?) => fetch(input, init).then(res => res.json())
+const fetcher = (url, params) => fetch(`${url}${optionsToString(params)}`).then(res => res.json())
 
 const PDAs = ['TF_WEAPON_PDA_SPY', 'TF_WEAPON_BUILDER', 'TF_WEAPON_PDA_ENGINEER_DESTROY', 'TF_WEAPON_PDA_ENGINEER_BUILD']
 
@@ -19,25 +20,32 @@ const optionsToString = (options) => {
   return query.slice(0, -1)
 }
 
-export default function MainPage({initialItems, initialOptions}) {
+const Usage = ({ initialOptions}) => {
   const [options, setOptions] = useState(initialOptions)
-  const { data, error } = useSWR(`/api/usage${optionsToString(options)}`, fetcher)
-
-  const items = data || initialItems
+  const { data } = useSWR(['/api/usage', options || initialOptions], fetcher)
+  const [ignorePDAs, setIgnorePDAs] = useState(true)
 
   return (
-    <Layout>
-      <div className="flex flex-col divide-y-[1px] items-center divide-slate-500">
-        <Options options={options} setOptions={setOptions} />
-        <div className="space-y-3 pt-4">
-          {
-            items.filter((item) => !(options.ignorePDAs && PDAs.includes(item.name))).map((item, index) => (
-              <Item {...item} rank={index + 1} key={item.defindex} />
-            ))
-          }
-        </div>
+    <div className="flex flex-col divide-y-[1px] items-center divide-slate-500">
+      <Options options={options} setOptions={setOptions} ignorePDAs={ignorePDAs} setIgnorePDAs={setIgnorePDAs} />
+      <div className="space-y-3 pt-4">
+        { data &&
+          data.filter((item) => !(ignorePDAs && PDAs.includes(item.name))).map((item, index) => (
+            <Item {...item} rank={index + 1} key={item.defindex} />
+          ))
+        }
       </div>
-    </Layout>
+    </div>
+  )
+}
+
+export default function Page({ fallback, initialOptions}) {
+  return (
+    <SWRConfig value={{ fallback }}>
+      <Layout>
+        <Usage initialOptions={initialOptions} />
+      </Layout>
+    </SWRConfig>
   )
 }
 
@@ -48,11 +56,10 @@ export async function getStaticProps(context) {
 
   return {
     props: {
-      initialItems: items,
-      initialOptions: {
-        ...query,
-        ignorePDAs: true
-      }
+      fallback: {
+        [unstable_serialize(['/api/usage', query])]: items
+      },
+      initialOptions: query
     },
     revalidate: 3600
   }
