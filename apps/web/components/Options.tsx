@@ -36,7 +36,7 @@ export const enabledSlots = {
   6: [0, 1, 2, -1, 'cosmetic', 'taunt'], // heavy
   7: [0, 1, 2, -1, 'cosmetic', 'taunt'], // pyro
   8: [1, 2, 3, 4, 6, -1, 'cosmetic', 'taunt'], // spy
-  9: [0, 1, 2, 4, 5, 6 -1, 'cosmetic', 'taunt'] // engineer
+  9: [0, 1, 2, 4, 5, 6, -1, 'cosmetic', 'taunt'] // engineer
 }
 
 const defaultValue: {
