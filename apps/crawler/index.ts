@@ -28,7 +28,10 @@ const updateQueue = async (steamid: string): Promise<void>=> {
 const nextSteamID = async () => {
   let steamid: string
   do {
-    if (queue.length === 0) queue = [process.env.START_STEAMID]
+    if (queue.length === 0) {
+      queue = [process.env.START_STEAMID]
+      seen.splice(0, seen.length)
+    }
     steamid = queue.shift() as string
   } while (seen.includes(steamid))
   
