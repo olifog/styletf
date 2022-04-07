@@ -43,7 +43,7 @@ const getPlayerItems = async (steamid: string) => {
   const response = await fetch(`http://api.steampowered.com/IEconItems_440/GetPlayerItems/v0001/?key=${process.env.API_KEY}&steamid=${steamid}`)
   const items: GetPlayerItemsResponse = await response.json() as GetPlayerItemsResponse
 
-  if (items.result.items == undefined) throw TypeError
+  if (items.result.items == undefined || items.result.items.length === 0) throw TypeError
 
   const equipped = items.result.items.reduce((out: FilteredItem[], item) => {
     if (item.equipped == undefined) {
