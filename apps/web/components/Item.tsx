@@ -6,16 +6,16 @@ const translation = {
   'TF_WEAPON_FLAMETHROWER': 'Flamethrower',
   'TF_WEAPON_GRENADELAUNCHER': 'Grenade Launcher',
   'TF_WEAPON_MINIGUN': 'Minigun',
-  'TF_WEAPON_SHOTGUN_PRIMARY': 'Engineer\'s Shotgun',
+  'TF_WEAPON_SHOTGUN_PRIMARY': 'Shotgun',
   'TF_WEAPON_SYRINGEGUN_MEDIC': 'Syringe Gun',
   'TF_WEAPON_SNIPERRIFLE': 'Sniper Rifle',
   'TF_WEAPON_REVOLVER': 'Revolver',
-  'TF_WEAPON_PISTOL_SCOUT': 'Scout\'s Pistol',
-  'TF_WEAPON_SHOTGUN_SOLDIER': 'Soldier\'s Shotgun',
-  'TF_WEAPON_SHOTGUN_PYRO': 'Pyro\'s Shotgun',
+  'TF_WEAPON_PISTOL_SCOUT': 'Pistol',
+  'TF_WEAPON_SHOTGUN_SOLDIER': 'Shotgun',
+  'TF_WEAPON_SHOTGUN_PYRO': 'Shotgun',
   'TF_WEAPON_PIPEBOMBLAUNCHER': 'Stickybomb Launcher',
-  'TF_WEAPON_SHOTGUN_HWG': 'Heavy\'s Shotgun',
-  'TF_WEAPON_PISTOL': 'Engineer\s Pistol',
+  'TF_WEAPON_SHOTGUN_HWG': 'Shotgun',
+  'TF_WEAPON_PISTOL': 'Pistol',
   'TF_WEAPON_MEDIGUN': 'Medi Gun',
   'TF_WEAPON_SMG': 'SMG',
   'TF_WEAPON_BUILDER_SPY': 'Sapper',
@@ -45,7 +45,13 @@ const translation = {
   'Replay Taunt': 'Taunt: The Director\'s Vision',
   'High Five Taunt': 'Taunt: The High Five!',
   'Meet the Medic Heroic Taunt': 'Taunt: Meet the Medic',
-  'RPS Taunt': 'Taunt: Rock, Paper, Scissors'
+  'RPS Taunt': 'Taunt: Rock, Paper, Scissors',
+  'TTG Max Pistol - Poker Night': 'Lugermorph',
+  'TTG Max Pistol': 'Vintage Lugermorph',
+  'Panic Attack Shotgun': 'The Panic Attack',
+  'Stickybomb Jumper': 'The Sticky Jumper',
+  'TTG Sam Revolver': 'The Big Kill',
+  'OSX Item': 'Earbuds'
 }
 
 const sanitiseName = (name) => {
@@ -65,7 +71,7 @@ const sanitiseName = (name) => {
 
 export default function Item ({ name, imageUrl, usage, defindex, rank }) {
   return (
-    <div className="relative flex w-96">
+    <div className="relative flex">
       <div className="absolute -left-12 h-24 flex flex-col justify-center pr-3">
         <span className="text-2xl inline-block font-bold text-slate-300"><pre>{('#' + rank).padStart(3, ' ')}</pre></span>
       </div>
@@ -75,11 +81,11 @@ export default function Item ({ name, imageUrl, usage, defindex, rank }) {
           <Image src={imageUrl} alt={sanitiseName(name)} width={96} height={96} />
         </div>
       </div>
-      <div className="pl-2 py-2 flex flex-col text-slate-300 justify-between">
-        <span className="whitespace-nowrap">{sanitiseName(name)}</span>
+      <div className="pl-2 md:py-2 flex flex-col text-slate-300 justify-between">
+        <div><span className="absolute w-40 md:w-96">{sanitiseName(name)}</span></div>
         <div>
           <span className="text-xs">Usage rate:</span>
-          <div><span className="font-bold">{(usage*100).toFixed(3)}</span>%</div>
+          <div><span className="font-bold -top-1">{(usage*100).toFixed(3)}</span>%</div>
         </div>
       </div>
     </div>

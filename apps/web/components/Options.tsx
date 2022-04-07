@@ -62,7 +62,7 @@ const Options: React.FC<OptionsProps> = ({options, setOptions, ignorePDAs, setIg
       </div>
       <ClassSelect options={options} setOptions={setOptions} setSelect={setSelectValue} />
       <Select
-        className="z-50 w-64 text-black"
+        className="z-40 w-64 text-black"
         value={selectValue}
         options={selectOptions}
         onChange={(newValue) => {

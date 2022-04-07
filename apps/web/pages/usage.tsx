@@ -29,7 +29,7 @@ const Usage = ({ initialOptions}) => {
   return (
     <div className="flex flex-col divide-y-[1px] items-center divide-slate-500">
       <Options options={options} setOptions={setOptions} ignorePDAs={ignorePDAs} setIgnorePDAs={setIgnorePDAs} />
-      <div className="space-y-3 pt-4">
+      <div className="space-y-6 md:space-y-3 pt-4 w-60 md:w-96">
         { data &&
           data.filter((item) => !(ignorePDAs && PDAs.includes(item.name))).map((item, index) => (
             <Item {...item} rank={index + 1} key={item.defindex} />
